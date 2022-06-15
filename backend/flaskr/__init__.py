@@ -27,7 +27,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # CORS(app, resources={r"/http://127.0.0.1:5000/*": {"origins": "*"}})
     
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -40,6 +40,7 @@ def create_app(test_config=None):
         response.headers.add(
             "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
         )
+        response.headers.add("Access-Control-Allow-Credentials", "true")
         return response
 
     """
@@ -137,6 +138,28 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def post_question():
+        body = request.get_json()
+
+        new_question = body.get("question", True)
+        new_answer = body.get("answer", True)
+        new_category = body.get("category", True)
+        difficulty = body.get("difficulty", True)
+        
+        try:
+            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=difficulty)
+            question.insert()
+            return {
+                'success': True
+            }
+        
+        except:
+            abort(422)
+                
+            
+
+
 
     """
     @TODO:
@@ -148,6 +171,28 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route('/questions', methods=['POST'])
+    def search_question():
+        body = request.get_json()
+        search = body.get("search", None)
+        
+        questions = Question.query.order_by(Question.id).filter(
+                    Question.title.ilike("%{}%".format(search))
+        )
+        current_question = paginate_questions(request, question)
+        search_result = [question.format() for question in questions]
+
+        return jsonify(
+            {
+                "questions": search_result,
+                "total_question": len(questions.all()),
+                'success': True,
+                # 'questions': current_question,
+                # 'total_questions': len(Question.query.all()),
+                # 'categories': {category.id: category.type for category in categories},
+                'current_category': None
+            }
+        )
 
     """
     @TODO:
