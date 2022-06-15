@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -174,25 +175,19 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def search_question():
         body = request.get_json()
-        search = body.get("search", None)
+        search = body.get("searchTerm", None)
         
-        questions = Question.query.order_by(Question.id).filter(
-                    Question.title.ilike("%{}%".format(search))
-        )
-        current_question = paginate_questions(request, question)
+        questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
+        current_question = paginate_questions(request, questions)
         search_result = [question.format() for question in questions]
 
-        return jsonify(
-            {
-                "questions": search_result,
-                "total_question": len(questions.all()),
-                'success': True,
-                # 'questions': current_question,
-                # 'total_questions': len(Question.query.all()),
-                # 'categories': {category.id: category.type for category in categories},
-                'current_category': None
-            }
-        )
+        return jsonify({
+            'success': True,
+            "questions": current_question,
+            "total_question": len(questions.all()),
+            'current_category': None
+        })
+        
 
     """
     @TODO:
@@ -202,7 +197,22 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:category_id>/questions')
+    def get_questions_by_category(category_id):
+        # categories = Category.query.order_by(Category.id).all()
+        questions = Question.query.order_by(Question.id).filter(Question.category==category_id).all()
+        current_question = paginate_questions(questions)
+        
+        if len(current_question)==0:
+            abort(404)
 
+        return {
+            'success': True,
+            'questions': current_question,
+            'total_questions': len(questions),
+            # 'categories': {category.id: category.type for category in categories},
+            'current_category': category_id
+        }
     """
     @TODO:
     Create a POST endpoint to get questions to play the quiz.
