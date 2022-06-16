@@ -241,58 +241,67 @@ def create_app(test_config=None):
     """
     @app.route('/quizzes', methods=['POST'])
     def post_quiz():
-        # questions = Question.query.order_by(Question.id).filter(Question.category==category_id).all()
-        # current_question = paginate_questions(questions)
         
         body = request.get_json()
 
-        # If body doesn't contain a JSON object, return error
         if not body:
             abort(400)
         
-        # Get paramters from JSON Body.
-        previous_questions = body.get('previous_question', None)
+        # print(body)
+        # print(body[2])
+        previous_questions = body.get('previous_questions', None)
         quiz_category = body.get('quiz_category', None)
-
-        # If previous_questions is specified
+        # print(previous_questions)
+        # print(quiz_category)
+        
         if previous_questions:
-            # If current category has a value/is specified and its value is not 0
-            if quiz_category and quiz_category['id']!=0:
-
-                # Query for questions in that category except the previous question
+            if quiz_category and quiz_category['id']:
                 question_list = (Question.query
                 .filter(Question.category == str(quiz_category['id']))
                 .filter(Question.id.notin_(previous_questions))
                 .all())
             else:
-                # if the current category is not specified, 
-                # Query for all the questions in database except the previous question
                 question_list = (Question.query
                 .filter(Question.id.notin_(previous_questions))
                 .all())
                 
         else:
-                # If previous question isn't specified
-            # If current category has a value/is specified and its value is not 0
-            if quiz_category and quiz_category['id']!=0:
-                # Query for questions in that category
+            if quiz_category and quiz_category['id']:
                 question_list = (Question.query
                 .filter(Question.category == str(quiz_category['id']))
                 .all())
             else:
-                # If previous question isn't specified
-                # If current category is not specified
-                # Get all questions from the database
                 question_list = (Question.query.all())
             
+        # print(question_list)
+        # print(previous_questions)
         
-            # Format questions & get a random question
-            questions_formatted = paginate_questions(question_list)
-            random_question = questions_formatted[random.randint(0, len(questions_formatted)-1)]
+       
+        # for item in question_list:
+        #     # print(item)
+        #     if item.id in previous_questions:
+        #         del question_list[item]
             
+                
+        # questions_formatted = (question_list)
+        random_number = random.randint(0, len(question_list)-1)
+        random_question = question_list[random_number]
+        # del question_list[random_number]
+        
+        # random_question = random.choice(question_list)
+        # print(random_question)
+        print(question_list)
+        
+        if len(question_list) == 0:
+            return{
+                'success': True,
+                'question': False
+            }
+        
+        else:
             return jsonify({
                 'success': True,
-                'question': random_question
+                'question': random_question.format()
             })
     """
     @TODO:
