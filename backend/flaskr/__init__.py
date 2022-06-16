@@ -252,10 +252,11 @@ def create_app(test_config=None):
         previous_questions = body.get('previous_questions', None)
         quiz_category = body.get('quiz_category', None)
         # print(previous_questions)
-        # print(quiz_category)
+        print(quiz_category)
+        print(quiz_category['id'])
         
         if previous_questions:
-            if quiz_category and quiz_category['id']:
+            if quiz_category['id']:
                 question_list = (Question.query
                 .filter(Question.category == str(quiz_category['id']))
                 .filter(Question.id.notin_(previous_questions))
@@ -266,7 +267,7 @@ def create_app(test_config=None):
                 .all())
                 
         else:
-            if quiz_category and quiz_category['id']:
+            if quiz_category['id']:
                 question_list = (Question.query
                 .filter(Question.category == str(quiz_category['id']))
                 .all())
@@ -284,11 +285,13 @@ def create_app(test_config=None):
             
                 
         # questions_formatted = (question_list)
-        random_number = random.randint(0, len(question_list)-1)
-        random_question = question_list[random_number]
+        # random_number = random.randint(0, len(question_list)-1)
+        # random_question = question_list[random_number]
         # del question_list[random_number]
-        
-        # random_question = random.choice(question_list)
+        i = 0
+        while i <= len(question_list)-1:
+            random_question = random.choice(question_list)
+            i += 1
         # print(random_question)
         print(question_list)
         
