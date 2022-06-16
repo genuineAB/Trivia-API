@@ -143,18 +143,35 @@ def create_app(test_config=None):
     def post_question():
         body = request.get_json()
 
-        new_question = body.get("question", True)
-        new_answer = body.get("answer", True)
-        new_category = body.get("category", True)
-        difficulty = body.get("difficulty", True)
+        new_question = body.get("question", None)
+        new_answer = body.get("answer", None)
+        new_category = body.get("category", None)
+        difficulty = body.get("difficulty", None)
+        search = body.get("searchTerm", None)
         
         try:
-            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=difficulty)
-            question.insert()
-            return {
-                'success': True
-            }
-        
+            if search:
+                
+                questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
+                current_question = paginate_questions(questions)
+                # search_result = [question.format() for question in questions]
+
+                return jsonify({
+                    'success': True,
+                    "questions": current_question,
+                    "total_question": len(questions),
+                    'current_category': None
+                })
+                
+            else:
+                
+                
+                question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=difficulty)
+                question.insert()
+                return {
+                    'success': True
+                }
+            
         except:
             abort(422)
                 
@@ -172,21 +189,21 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route('/questions', methods=['POST'])
-    def search_question():
-        body = request.get_json()
-        search = body.get("searchTerm", None)
+    # @app.route('/questions', methods=['POST'])
+    # def search_question():
+    #     body = request.get_json()
+    #     search = body.get("searchTerm", None)
         
-        questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
-        current_question = paginate_questions(request, questions)
-        search_result = [question.format() for question in questions]
+    #     questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
+    #     current_question = paginate_questions(request, questions)
+    #     search_result = [question.format() for question in questions]
 
-        return jsonify({
-            'success': True,
-            "questions": current_question,
-            "total_question": len(questions.all()),
-            'current_category': None
-        })
+    #     return jsonify({
+    #         'success': True,
+    #         "questions": current_question,
+    #         "total_question": len(questions.all()),
+    #         'current_category': None
+    #     })
         
 
     """
@@ -197,9 +214,8 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
-    @app.route('/categories/<int:category_id>/questions')
+    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def get_questions_by_category(category_id):
-        # categories = Category.query.order_by(Category.id).all()
         questions = Question.query.order_by(Question.id).filter(Question.category==category_id).all()
         current_question = paginate_questions(questions)
         
@@ -210,7 +226,6 @@ def create_app(test_config=None):
             'success': True,
             'questions': current_question,
             'total_questions': len(questions),
-            # 'categories': {category.id: category.type for category in categories},
             'current_category': category_id
         }
     """
@@ -224,7 +239,9 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-
+    # @app.route('/quizzes', methods=['POST'])
+    # def post_quiz():
+        
     """
     @TODO:
     Create error handlers for all expected errors
