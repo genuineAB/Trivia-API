@@ -153,12 +153,12 @@ def create_app(test_config=None):
             if search:
                 
                 questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
-                current_question = paginate_questions(questions)
-                # search_result = [question.format() for question in questions]
+                # current_question = paginate_questions(questions)
+                search_result = [question.format() for question in questions]
 
                 return jsonify({
                     'success': True,
-                    "questions": current_question,
+                    "questions": search_result,
                     "total_question": len(questions),
                     'current_category': None
                 })
@@ -195,7 +195,7 @@ def create_app(test_config=None):
     #     search = body.get("searchTerm", None)
         
     #     questions = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search))).all()
-    #     current_question = paginate_questions(request, questions)
+    #     current_question = paginate_questions(rquestions)
     #     search_result = [question.format() for question in questions]
 
     #     return jsonify({
@@ -239,9 +239,61 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    # @app.route('/quizzes', methods=['POST'])
-    # def post_quiz():
+    @app.route('/quizzes', methods=['POST'])
+    def post_quiz():
+        # questions = Question.query.order_by(Question.id).filter(Question.category==category_id).all()
+        # current_question = paginate_questions(questions)
         
+        body = request.get_json()
+
+        # If body doesn't contain a JSON object, return error
+        if not body:
+            abort(400)
+        
+        # Get paramters from JSON Body.
+        previous_questions = body.get('previous_question', None)
+        quiz_category = body.get('quiz_category', None)
+
+        # If previous_questions is specified
+        if previous_questions:
+            # If current category has a value/is specified and its value is not 0
+            if quiz_category and quiz_category['id']!=0:
+
+                # Query for questions in that category except the previous question
+                question_list = (Question.query
+                .filter(Question.category == str(quiz_category['id']))
+                .filter(Question.id.notin_(previous_questions))
+                .all())
+            else:
+                # if the current category is not specified, 
+                # Query for all the questions in database except the previous question
+                question_list = (Question.query
+                .filter(Question.id.notin_(previous_questions))
+                .all())
+                
+        else:
+                # If previous question isn't specified
+            # If current category has a value/is specified and its value is not 0
+            if quiz_category and quiz_category['id']!=0:
+                # Query for questions in that category
+                question_list = (Question.query
+                .filter(Question.category == str(quiz_category['id']))
+                .all())
+            else:
+                # If previous question isn't specified
+                # If current category is not specified
+                # Get all questions from the database
+                question_list = (Question.query.all())
+            
+        
+            # Format questions & get a random question
+            questions_formatted = paginate_questions(question_list)
+            random_question = questions_formatted[random.randint(0, len(questions_formatted)-1)]
+            
+            return jsonify({
+                'success': True,
+                'question': random_question
+            })
     """
     @TODO:
     Create error handlers for all expected errors
