@@ -87,7 +87,7 @@ def create_app(test_config=None):
         }
     
 
-    print(app.url_map)
+    # print(app.url_map)
     
     
     """
@@ -125,7 +125,7 @@ def create_app(test_config=None):
                 abort(422)
             }
     
-    print(app.url_map)
+    # print(app.url_map)
 
 
 
@@ -252,8 +252,8 @@ def create_app(test_config=None):
         previous_questions = body.get('previous_questions', None)
         quiz_category = body.get('quiz_category', None)
         # print(previous_questions)
-        print(quiz_category)
-        print(quiz_category['id'])
+        # print(quiz_category)
+        # print(quiz_category['id'])
         
         if previous_questions:
             if quiz_category['id']:
@@ -293,7 +293,7 @@ def create_app(test_config=None):
             random_question = random.choice(question_list)
             i += 1
         # print(random_question)
-        print(question_list)
+        # print(question_list)
         
         if len(question_list) == 0:
             return{
