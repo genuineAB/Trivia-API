@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 import '../stylesheets/QuizView.css';
 
-const questionsPerPlay = 5;
+// const questionsPerPlay = 5;
 
 class QuizView extends Component {
   constructor(props) {
@@ -130,7 +130,7 @@ class QuizView extends Component {
     return (
       <div className='quiz-play-holder'>
         <div className='final-header'>
-          Your Final Score is {this.state.numCorrect}
+          Your Final Score is {this.state.numCorrect} of {this.state.previousQuestions.length}
         </div>
         <div className='play-again button' onClick={this.restartGame}>
           Play Again?
@@ -168,9 +168,8 @@ class QuizView extends Component {
       </div>
     );
   }
-
   renderPlay() {
-    return this.state.previousQuestions.length === questionsPerPlay ||
+    return this.state.previousQuestions.length === this.state.previousQuestions.length - 1 ||
       this.state.forceEnd ? (
       this.renderFinalScore()
     ) : this.state.showAnswer ? (
