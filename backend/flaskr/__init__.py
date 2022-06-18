@@ -19,16 +19,17 @@ def paginate_questions(selection):
 
     return current_questions
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
-    CORS(app)
+    # CORS(app)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    # CORS(app, resources={r"/http://127.0.0.1:5000/*": {"origins": "*"}})
+    CORS(app, resources={r"*": {"origins": ['http://localhost:5000', 'http://localhost:3000']}})
     
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
